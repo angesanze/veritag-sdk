@@ -1,0 +1,32 @@
+name: dna424_client
+description: Embeddable client SDK for the 424 DNA ecosystem — ECDSA identity, binding signing, NTAG 424 DNA provisioning, and tag verification.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  # Crypto / identity
+  elliptic: ^0.3.12
+  ecdsa: ^0.0.4
+  crypto: ^3.0.3
+  convert: ^3.1.1
+  http: ^1.1.0
+
+  # AES (CBC/ECB) + AES-CMAC for the NTAG 424 EV2 secure channel (provisioning)
+  pointycastle: ^3.9.1
+
+  # Hardware (optional at runtime; provisioning needs it, verifying does not)
+  flutter_nfc_kit: ^3.4.2
+  ndef: ^0.3.3   # required by flutter_nfc_kit; our NDEF layout lives in src/tag_codec.dart
+
+  # Secure storage. SecureKeyStore (Keychain / Keystore / StrongBox) is the
+  # Phase 3 replacement for SharedPrefsKeyStore; the latter stays only as the
+  # documented-insecure fallback. See DEVELOPMENT_PLAN §5.
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.0
+
+dev_dependencies:
+  test: ^1.24.0
+  flutter_lints: ^4.0.0

@@ -1,0 +1,22 @@
+{
+  "name": "@dna424/client",
+  "version": "0.1.0",
+  "description": "Embeddable web client SDK for the 424 DNA ecosystem (identity + attestation verify).",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsc -p tsconfig.json && node --test test/*.test.mjs"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "fake-indexeddb": "^6.2.5",
+    "typescript": "^5.4.0"
+  }
+}

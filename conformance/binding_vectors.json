@@ -1,0 +1,21 @@
+{
+  "_about": "Cross-SDK conformance vectors. Every client SDK's buildBinding(uid, context) MUST equal SHA-256(uid + '|' + context), UTF-8. If any SDK drifts, a binding built on web won't match one built on mobile and the issuer signature won't line up. The TS and Dart test suites both load this file and assert. The third vector uses non-ASCII to pin UTF-8 encoding.",
+  "scheme": "SHA-256(utf8(uid + '|' + context))",
+  "vectors": [
+    {
+      "uid": "04D2760000850100",
+      "context": "some-context",
+      "binding_hex": "b6aa1eedf8982256e029a0456e74be5d2aaa66b60bf21ace3410991f802d57e9"
+    },
+    {
+      "uid": "AABBCCDDEEFF0011",
+      "context": "artwork:42",
+      "binding_hex": "04e9d7c1284578306d211d9e19242ca6e5ffc286401e57f7bd28db061c338031"
+    },
+    {
+      "uid": "04958CAA5C5E80",
+      "context": "müséé:café",
+      "binding_hex": "be1bd0991dcea1daa2b2255288736411a0e2aaeee0748cc13a85ef083b1623ca"
+    }
+  ]
+}
