@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
-import 'package:dna424_client/dna424_client.dart';
+import 'package:veritag_sdk/veritag_sdk.dart';
 import 'package:test/test.dart';
 
 /// SDM-CMAC validated against the official NXP AN12196 vectors — the same ones

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:convert/convert.dart';
-import 'package:dna424_client/dna424_client.dart';
+import 'package:veritag_sdk/veritag_sdk.dart';
 import 'package:test/test.dart';
 
 Uint8List h(String s) => Uint8List.fromList(hex.decode(s));

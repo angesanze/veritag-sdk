@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:dna424_client/src/tag_codec.dart';
+import 'package:veritag_sdk/src/tag_codec.dart';
 import 'package:test/test.dart';
 
 void main() {

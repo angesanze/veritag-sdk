@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:dna424_client/dna424_client.dart';
+import 'package:veritag_sdk/veritag_sdk.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:test/test.dart';

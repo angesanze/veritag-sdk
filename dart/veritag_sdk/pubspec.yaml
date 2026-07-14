@@ -1,5 +1,5 @@
-name: dna424_client
-description: Embeddable client SDK for the 424 DNA ecosystem — ECDSA identity, binding signing, NTAG 424 DNA provisioning, and tag verification.
+name: veritag_sdk
+description: Veritag client SDK — NTAG 424 DNA attestation — ECDSA identity, binding signing, NTAG 424 DNA provisioning, and tag verification.
 version: 0.1.0
 publish_to: none
 

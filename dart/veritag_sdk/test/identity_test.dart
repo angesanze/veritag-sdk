@@ -1,5 +1,5 @@
 import 'package:convert/convert.dart';
-import 'package:dna424_client/dna424_client.dart';
+import 'package:veritag_sdk/veritag_sdk.dart';
 import 'package:test/test.dart';
 
 /// In-memory KeyStore so identity tests don't need a device/secure store.

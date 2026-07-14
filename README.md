@@ -5,8 +5,8 @@ Domain-agnostic: nothing here knows what a tag *represents*.
 
 | Package | Path | What |
 |---|---|---|
-| **Dart / Flutter** | `dart/dna424_client/` | ECDSA identity (secure storage), NTAG 424 DNA scan/identify (`GetVersion` gate) + SDM provisioning (EV2, AN12196-validated), `AttestClient` HTTP |
-| **TypeScript / Web** | `ts/dna424-client/` | WebCrypto identity (non-extractable `CryptoKey` + IndexedDB), `AttestClient` HTTP |
+| **Dart / Flutter** | `dart/veritag_sdk/` | ECDSA identity (secure storage), NTAG 424 DNA scan/identify (`GetVersion` gate) + SDM provisioning (EV2, AN12196-validated), `AttestClient` HTTP |
+| **TypeScript / Web** | `ts/veritag-sdk/` | WebCrypto identity (non-extractable `CryptoKey` + IndexedDB), `AttestClient` HTTP |
 | **Conformance** | `conformance/` | Shared binding vectors — Dart and TS must sign byte-identically |
 
 ## Use
@@ -15,23 +15,23 @@ Dart (git dependency):
 
 ```yaml
 dependencies:
-  dna424_client:
+  veritag_sdk:
     git:
       url: git@github.com:angesanze/veritag-sdk.git
-      path: dart/dna424_client
+      path: dart/veritag_sdk
 ```
 
 TS (checkout + file dependency, the convention `veritag-app` uses):
 
 ```json
-"@dna424/client": "file:../sdk/ts/dna424-client"
+"@dna424/client": "file:../sdk/ts/veritag-sdk"
 ```
 
 ## Test
 
 ```bash
-cd dart/dna424_client && flutter test      # EV2/SDM vectors, identity, conformance
-cd ts/dna424-client && npm install && npm test
+cd dart/veritag_sdk && flutter test      # EV2/SDM vectors, identity, conformance
+cd ts/veritag-sdk && npm install && npm test
 ```
 
 No CI here by design: the SDK is a library, consumers (see `veritag-app`) build against it.

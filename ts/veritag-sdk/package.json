@@ -1,5 +1,5 @@
 {
-  "name": "@dna424/client",
+  "name": "@veritag/sdk",
   "version": "0.1.0",
   "description": "Embeddable web client SDK for the 424 DNA ecosystem (identity + attestation verify).",
   "type": "module",
