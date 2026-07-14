@@ -1,6 +1,6 @@
 # veritag-sdk
 
-Embeddable client SDK for the 424 DNA ecosystem — the client half of AttestCore.
+The Veritag client SDK (NTAG 424 DNA attestation) — the client half of AttestCore.
 Domain-agnostic: nothing here knows what a tag *represents*.
 
 | Package | Path | What |
@@ -24,7 +24,7 @@ dependencies:
 TS (checkout + file dependency, the convention `veritag-app` uses):
 
 ```json
-"@dna424/client": "file:../sdk/ts/veritag-sdk"
+"@veritag/sdk": "file:../sdk/ts/veritag-sdk"
 ```
 
 ## Test
