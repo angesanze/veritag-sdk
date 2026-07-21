@@ -241,25 +241,40 @@ class TagProvisioner {
     return Uint8List.fromList(out);
   }
 
+  Future<void> _updateBinary(int off, List<int> data) async {
+    final (_, sw) = _split(await _transceive(Uint8List.fromList(
+        [0x00, 0xD6, (off >> 8) & 0xFF, off & 0xFF, data.length, ...data])));
+    if (sw != 0x9000) {
+      throw StateError('UpdateBinary sw=${sw.toRadixString(16)}'
+          '${sw == 0x6982 ? " (file locked — tag already provisioned?)" : ""}');
+    }
+  }
+
   /// ISOUpdateBinary the NDEF file, power-loss safe: NLEN is zeroed first and
   /// written back last, so a torn write leaves an *empty* file, never garbage.
   Future<void> _writeNdefFile(Uint8List file) async {
     await _selectApplication();
     await _selectNdefFile();
-    Future<void> write(int off, List<int> data) async {
-      final (_, sw) = _split(await _transceive(Uint8List.fromList(
-          [0x00, 0xD6, (off >> 8) & 0xFF, off & 0xFF, data.length, ...data])));
-      if (sw != 0x9000) {
-        throw StateError('UpdateBinary sw=${sw.toRadixString(16)}'
-            '${sw == 0x6982 ? " (file locked — tag already provisioned?)" : ""}');
-      }
-    }
-
-    await write(0, const [0x00, 0x00]);
+    await _updateBinary(0, const [0x00, 0x00]);
     for (var off = 2; off < file.length; off += 120) {
-      await write(off, file.sublist(off, min(off + 120, file.length)));
+      await _updateBinary(off, file.sublist(off, min(off + 120, file.length)));
     }
-    await write(0, file.sublist(0, 2));
+    await _updateBinary(0, file.sublist(0, 2));
+  }
+
+  /// Zero the whole NDEF file: length first (so the tag reads as empty from the
+  /// very first byte written), then every byte of the body, so nothing of the
+  /// old record survives in the chip — not even unreferenced bytes.
+  ///
+  /// Only works while the file is writable: on a provisioned tag call
+  /// [_openNdefFile] over an EV2 session first.
+  Future<void> _eraseNdefFile({int size = 256}) async {
+    await _selectApplication();
+    await _selectNdefFile();
+    await _updateBinary(0, const [0x00, 0x00]);
+    for (var off = 2; off < size; off += 120) {
+      await _updateBinary(off, List<int>.filled(min(120, size - off), 0x00));
+    }
   }
 
   /// Poll the tag with a cheap APDU until it stops answering (left the field).
@@ -381,6 +396,30 @@ class TagProvisioner {
     }
   }
 
+  /// Undo [_changeFileSettings]: SDM off, plain comm, and the NDEF file open
+  /// for writing again (Read/Write free, RW/Change still Key0). This is what
+  /// makes a provisioned tag erasable — after provisioning, Write needs Key0.
+  Future<void> _openNdefFile(_Ev2Session s) async {
+    final settings = Uint8List.fromList([
+      0x00, // FileOption: SDM off, CommMode.PLAIN
+      0x00, 0xEE, // AccessRights: Read/Write free, RW/Change = Key0
+    ]);
+    final header = Uint8List.fromList([0x02]);
+    final enc = Ev2.encryptCommandData(s.sesEnc, s.ti, s.cmdCtr, settings);
+    final mac = Ev2.commandMac(s.sesMac, 0x5F, s.cmdCtr, s.ti, header, enc);
+    final apdu = Uint8List.fromList([
+      0x90, 0x5F, 0x00, 0x00,
+      header.length + enc.length + mac.length,
+      ...header, ...enc, ...mac, 0x00,
+    ]);
+    final (_, sw) = _split(await _transceive(apdu));
+    s.advance();
+    if (sw != 0x9100) {
+      throw StateError('ChangeFileSettings (reopen) failed: '
+          'sw=${sw.toRadixString(16)}');
+    }
+  }
+
   // -- small helpers -------------------------------------------------------
   Uint8List _randomBytes(int n) =>
       Uint8List.fromList(List<int>.generate(n, (_) => _rng.nextInt(256)));
@@ -471,6 +510,33 @@ class ArtTagSession {
     onStatus?.call('Enabling secure mirroring (SDM)');
     await _p._changeFileSettings(session,
         uidOffset: tpl.uidOff, ctrOffset: tpl.ctrOff, cmacOffset: tpl.cmacOff);
+  }
+
+  /// Retire this tag: stop the mirroring, reopen the NDEF file and zero it.
+  ///
+  /// Afterwards the chip carries nothing — no record, no UID/counter/CMAC
+  /// mirror — so a phone that meets it sees a blank tag and dispatches nowhere.
+  /// This is how a tag written in an older format (a URL record that opened a
+  /// browser, say) is taken out of circulation. The silicon and its keys are
+  /// left alone: the chip can be provisioned again from scratch.
+  Future<void> wipe({
+    Uint8List? authKey0,
+    void Function(String)? onStatus,
+  }) async {
+    if (_sim) return;
+    // The NDEF application has to be selected before AuthEV2First, or the chip
+    // answers 9140 (no such key) — it is looking in the wrong application.
+    await _p._selectApplication();
+
+    onStatus?.call('Authenticating (EV2, Key0)');
+    final session =
+        await _p._authenticateEv2First(keyNo: 0, key: authKey0 ?? Uint8List(16));
+
+    onStatus?.call('Turning off mirroring');
+    await _p._openNdefFile(session);
+
+    onStatus?.call('Erasing the record');
+    await _p._eraseNdefFile();
   }
 }
 
